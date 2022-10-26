@@ -1,0 +1,28 @@
+Buna Andreea,
+
+În urma primei discuții feedback-ul nostru este unul pozitiv fapt pentru care ne-am dori sa mergem la următoarea etapă din proces, poti regasi aici code challange-ul Sensidev.
+
+(https://drive.google.com/file/d/1jy_WveANVYwWFvkHTO5afRmqDSUiajbb/view?usp=sharing)
+
+Citeste cu atentie cerințele și încearca sa le implementezi.
+
+
+Bonus points pentru:
+
+atenție la commituri și numărul lor
+custom development ( cu cat mai original cu atat mai mult de apreciat) acolo unde este posibil
+pro-activitate, atenție la detalii, implicare
+
+In document regasesti detalii despre cum sa procedezi cu crearea unui repo. Adăuga pe acest repo următorul user cand testul este gata: ionut-movila, iar colegul meu va face code review pe aplicație.
+
+(https://github.com/ionut-movila)
+
+P.S. - Poți folosi si REST version of the API instead of GraphQL 
+
+(https://rickandmortyapi.com/documentation/#rest)
+
+Am rugamintea sa atasezi si link-ul catre repo la final si sa folosesti optiunea de "reply all", iar daca ai intrebari legate de test ne poti scrie aici si te vom ajuta cu clarificari.
+
+Te rog sa imi confirmi primirea mesajului și totodată cam in cat timp estimezi ca ne poți trimite testul.
+
+Mult succes :)
