@@ -1,29 +1,20 @@
-import React, {useEffect, useState, useRef} from 'react'
-import styled from "styled-components";
+import React, {useEffect, useRef} from 'react'
 import axios from 'axios';
 import {debounce} from "lodash";
+import {useDispatch, useSelector} from "react-redux";
+import { addCharactersToList, changeNextPageUrl, changeSarchName, changeSearchStatus, replaceCharactersList, selectCharacters, selectNextPageUrl, selectSearchName, selectSearchStatus } from '../redux/CharactersListingSlice';
+import { Character } from '../types/Interface';
+import { useHistory } from 'react-router-dom';
+import { characterStatusMap, getCharactersUrl } from '../helpers/urlGenerators';
 
-
-interface Character {
-  name: string;
-  status: string;
-  species: string;
-}
-
-const characterStatusMap = new Map();
-  characterStatusMap.set("all", "all");
-  characterStatusMap.set("alive", "Alive");
-  characterStatusMap.set("dead", "Dead");
-  characterStatusMap.set("unknown", "unknown");
-
-
-let requestUrl = 'https://rickandmortyapi.com/api/character';
 
 export default function Home() {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [searchStatus, setSearchStatus] = useState([...characterStatusMap.keys()][0]);
-  const [searchName, setSearchName] = useState<string>('');
-  const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const characters = useSelector(selectCharacters);
+  const searchStatus = useSelector(selectSearchStatus);
+  const searchName = useSelector(selectSearchName);
+  const nextPageUrl = useSelector(selectNextPageUrl);
 
 
 
@@ -35,35 +26,25 @@ export default function Home() {
   
 
   const loadCharacters = (clear: boolean) => {
-    let baseUrl = new URL(nextPageUrl ? nextPageUrl : requestUrl);
-    const name = nameRef.current;
-    const status = statusRef.current;
-    if(name !== undefined) {
-      baseUrl.searchParams.append("name", name);
-    }
+    const requestUrl = getCharactersUrl(nextPageUrl, nameRef.current, statusRef.current);
 
-    if(status !== undefined && status !== characterStatusMap.get("all")) {
-      baseUrl.searchParams.append("status", status);
-    }
-
-
-
-    axios.get(baseUrl.href)
+    axios.get(requestUrl)
       .then(function (response) {
         if(response.status >= 200 && response.status < 300) {
           console.log({data: response.data, response: response});
           
-          setNextPageUrl(response.data.info.next);
+          dispatch(changeNextPageUrl(response.data.info.next));
+          // setNextPageUrl();
 
           if(nextPageUrl === null || clear) {
-            setCharacters(response.data.results);
+            dispatch(replaceCharactersList(response.data.results))
           } else {
-            setCharacters([...characters, ...response.data.results]);
+            dispatch(addCharactersToList(response.data.results))
           }
         }
       })
       .catch(function (error) {
-        setCharacters([])
+        dispatch(replaceCharactersList([]));
       });
   }
 
@@ -71,13 +52,13 @@ export default function Home() {
   const loadCharactersDebounced = useRef(debounce(loadCharacters, 200));
 
   const nameInputChangeHandler = (name: string) => {
-    setSearchName(name);
+    dispatch(changeSarchName(name));
     nameRef.current = name;
     loadCharactersDebounced.current(true);
   }
 
   const statusChangeHandler = (status: string) => {
-    setSearchStatus(status);
+    dispatch(changeSearchStatus(status))
     statusRef.current = status;
     loadCharactersDebounced.current(true)
   }
@@ -85,7 +66,9 @@ export default function Home() {
 
   
   useEffect(() => {
-    loadCharacters(true);
+    if(characters.length === 0) {
+      loadCharacters(true);
+    }
   }, []);
 
   const loadMoreHandler = () => {
@@ -93,8 +76,7 @@ export default function Home() {
   }
 
 
-
-
+  
 
 
   return (<>
@@ -106,7 +88,7 @@ export default function Home() {
         Value: {searchName}
       </div>
     </div>
-
+ 
     <div>
       <select onChange={(event: any) => {
         statusChangeHandler(event.target.value);
@@ -119,7 +101,11 @@ export default function Home() {
     <div>
       <div>
         {characters.map((character: Character) => {
-          return <div style={{border: "2px solid blue", margin: "15px"}}>
+          return <div style={{border: "2px solid blue", margin: "15px"}} onClick={() => {
+            console.log(`character/${character.id}`);
+            console.log(history);
+            history.push(`/character/${character.id}`)
+            }}>
             <div>{character.name}</div>
             <div>{character.status}</div>
             <div>{character.species}</div>
