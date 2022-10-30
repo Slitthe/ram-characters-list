@@ -18,6 +18,26 @@ const getCharactersUrl = (nextPageUrl: string | null, name?: string, status?: st
     }
   
     return requestUrl.href;
-  }
+};
 
-export {characterStatusMap, getCharactersUrl };
+const getCharacterDetails = (id: string) => {
+    return `https://rickandmortyapi.com/api/character/${id}`;
+}
+
+const getEpisodesListUrl = (episodesUrl: string[]) => {
+    // console.log(episodesUrl);
+    const idExtractorRegexp = /episode\/(\d+)/im;
+    const episodesIds = episodesUrl.map((url: string) => {
+        // console.log(url);
+        const capturedId = idExtractorRegexp.exec(url) as RegExpExecArray;
+        // console.log({capturedId, url, episodesUrl});
+        // console.log([...capturedId.values()]);
+        return capturedId["1"];
+
+    }).filter(id => id !== null);
+
+    // console.log(`https://rickandmortyapi.com/api/episode/${episodesIds.join(',')}`);
+    return `https://rickandmortyapi.com/api/episode/${episodesIds.join(',')}`;
+}
+
+export {characterStatusMap, getCharactersUrl, getCharacterDetails, getEpisodesListUrl };
