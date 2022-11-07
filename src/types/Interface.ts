@@ -8,5 +8,5 @@ export interface Character {
   name: string;
   status: string;
   image: string;
-  gender: string;
+  gender: "Male" | "Female" | "unknown";
 }

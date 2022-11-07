@@ -9,9 +9,9 @@ import Character from '../pages/Character';
 import Home from '../pages/CharactersListing';
 
 export enum ERouterUrl {
-  default = '/home',
-  home = '/home',
-  character = '/character/:id',
+  default = '/characters',
+  home = '/characters',
+  characters = '/character/:id',
 }
 
 
@@ -26,7 +26,7 @@ const PagesRouter = () => {
           <Home />
         </Route>
         <Route
-          path={ERouterUrl.character}
+          path={ERouterUrl.characters}
           children={<Character />}
         />
         <Redirect from="*" to={ERouterUrl.default}/>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,15 +7,80 @@ import { Character } from "../types/Interface";
 import { useHistory } from "react-router-dom";
 import { characterStatusMap, getCharactersUrl } from "../helpers/urlGenerators";
 import CharacterCard from "../components/CharacterCard";
-import styled from "styled-components";
+import styled, {keyframes} from "styled-components";
+import Wrapper from "../components/Wrapper";
+
+const spinnerAnimation = keyframes`
+  0% {transform: rotate(0deg);}
+  100% {transform: rotate(360deg);}
+`;
+
+const CharacterListingContainer = styled.div`
+  padding-bottom: 25px;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border-left: 10px solid blue;
+  border-right: 10px solid blue;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-radius: 100%;
+  animation-duration: 1.5s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-name: ${spinnerAnimation};
+`;
 
 const CardContainer = styled.div`
+  display: grid;
+  /* flex-wrap: wrap; */
+
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  grid-gap: 15px;
+  margin: 25px;
+`;
+
+const SearchInputContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+  justify-content: center;
+  padding: 20px;
+  font-size: 18px;
+`;
+
+const SearchInput = styled.input`
+  /* font-size: 18px; */
+  padding: 8px;
+  min-width: 50%;
+  max-width: 500px;
+`;
+
+const CategorySelect = styled.select`
+  text-align: center;
+`;
+
+const LoadMoreButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+const LoadMoreButton = styled.button`
+  font-size: 18px;
+  background: transparent;
+  border: 2px solid #0000004a;
+  padding: 5px 15px;
+  cursor: pointer;
+  outline: none;
+
+  transition: background-color ease-in-out 0.3s;
+
+  &:hover {
+    background-color: #0000001a;
+  }
 `;
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const history = useHistory();
   const characters = useSelector(selectCharacters);
@@ -28,7 +93,7 @@ export default function Home() {
 
   const loadCharacters = (clear: boolean) => {
     const requestUrl = getCharactersUrl(nextPageUrl, nameRef.current, statusRef.current);
-
+    setIsLoading(true);
     axios
       .get(requestUrl)
       .then(function (response) {
@@ -47,6 +112,9 @@ export default function Home() {
       })
       .catch(function (error) {
         dispatch(replaceCharactersList([]));
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -75,20 +143,16 @@ export default function Home() {
   };
 
   return (
-    <>
-      <div>
-        <input
+    <CharacterListingContainer>
+      <SearchInputContainer>
+        <SearchInput
           type="text"
           value={searchName}
           onChange={(e: any) => {
             nameInputChangeHandler(e.target.value);
           }}
         />
-        <div>Value: {searchName}</div>
-      </div>
-
-      <div>
-        <select
+        <CategorySelect
           onChange={(event: any) => {
             statusChangeHandler(event.target.value);
           }}
@@ -96,8 +160,8 @@ export default function Home() {
           {[...characterStatusMap.keys()].map((status: any) => {
             return <option value={status}>{characterStatusMap.get(status)}</option>;
           })}
-        </select>
-      </div>
+        </CategorySelect>
+      </SearchInputContainer>
       <div>
         <CardContainer>
           {characters.map((character: Character) => {
@@ -115,8 +179,13 @@ export default function Home() {
             );
           })}
         </CardContainer>
-        {nextPageUrl !== null ? <button onClick={loadMoreHandler}>Load more</button> : null}
+
+
+        <LoadMoreButtonContainer>
+          {!isLoading && nextPageUrl !== null ? <LoadMoreButton onClick={loadMoreHandler}>Load more</LoadMoreButton> : null}
+          {isLoading && nextPageUrl !== null ? <LoadingSpinner /> : null}
+        </LoadMoreButtonContainer>
       </div>
-    </>
+    </CharacterListingContainer>
   );
 }
